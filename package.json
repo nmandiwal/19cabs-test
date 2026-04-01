@@ -1,0 +1,14 @@
+{
+  "name": "19cabs-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "E2E regression tests for 19Cabs customer and driver apps",
+  "scripts": {
+    "test": "./run.sh",
+    "test:customer-login": "maestro test maestro/flows/customer/customer_login.yaml"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^12.3.0"
+  }
+}

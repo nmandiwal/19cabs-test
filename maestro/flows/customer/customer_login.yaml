@@ -1,0 +1,94 @@
+appId: com.nineteencabs.mobileapp
+env:
+  PHONE_NUMBER: "9999999993"
+  OTP: "1234"
+  currentFlowName: customer_login
+---
+# Pre-requisites (handled by run.sh):
+#   - Location set via ADB (Milton Keynes Central)
+#   - App data cleared + permissions granted
+#   - App launched via deep link to dev server (JS bundle loaded)
+
+# Dismiss Expo dev menu overlay if present on first launch
+# Tap the dimmed area above the bottom sheet to dismiss it
+- tapOn:
+    point: "50%,20%"
+    optional: true
+- waitForAnimationToEnd
+
+# Wait for auth screen to load (phone input)
+- retry:
+    maxRetries: 10
+    commands:
+      - assertVisible:
+          id: customer_phone_input
+
+# Enter phone number
+- tapOn:
+    id: customer_phone_input
+- inputText: ${PHONE_NUMBER}
+
+# Tap Send OTP
+- tapOn:
+    id: customer_send_otp
+- waitForAnimationToEnd
+
+# Wait for OTP screen
+- retry:
+    maxRetries: 10
+    commands:
+      - assertVisible:
+          id: customer_otp_input
+
+# Enter OTP
+- tapOn:
+    id: customer_otp_input
+- inputText: ${OTP}
+
+# Tap Verify & Continue
+- tapOn:
+    id: customer_verify_otp
+- waitForAnimationToEnd
+
+# Handle possible active ride from previous test run:
+# 1. Dismiss any alert dialog (e.g. "Driver Accepted", "Ride Cancelled", etc.)
+- tapOn:
+    text: "OK"
+    optional: true
+- waitForAnimationToEnd
+
+# 2. If active ride screen is showing, cancel the ride
+- runFlow:
+    when:
+      visible:
+        id: customer_cancel_ride
+    commands:
+      - tapOn:
+          id: customer_cancel_ride
+      - tapOn:
+          text: "Yes, Cancel"
+          optional: true
+      - waitForAnimationToEnd
+      - tapOn:
+          text: "OK"
+          optional: true
+      - waitForAnimationToEnd
+
+# Wait for main screen (pickup and drop inputs visible)
+- retry:
+    maxRetries: 15
+    commands:
+      - assertVisible:
+          id: customer_pickup_current_loc
+
+# Assert pickup and drop inputs are present
+- assertVisible:
+    id: customer_pickup_input
+- assertVisible:
+    id: customer_pickup_current_loc
+- assertVisible:
+    id: customer_drop_input
+- assertVisible:
+    id: customer_drop_current_loc
+
+- takeScreenshot: ${currentFlowName}_success
